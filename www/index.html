@@ -31,46 +31,73 @@
 	</head>
 	<body>
 		<div class="app">
-			<div class="titlebar">
-				<div class="logo"></div><h1>Be <span class="happy">Happy</span></h1>
-			</div>
-			<div>
-				<h2 class="js_today">
-					Today
-				</h2>
-				<h2 class="js_history">
-					History
-				</h2>
-			</div>
-			<div class="rate_area">
-				<h3>How do you feel today?</h3>
-				<input class="rating" type="range" min="0" max="100" value="50">
-				<p class="rate_output">50</p>
-			</div>
-			<input class="happy_text" type="text" placeholder="+ What makes you happy today?">
-			<div class="add_image">Add Image</div>
+			<div class="home_page">
+				<div class="titlebar">
+					<div class="logo"></div><h1>Be <span class="happy">Happy</span></h1>
+				</div>
+				<div class="time_buttons">
+					<h2 class="js_today">
+						Today
+					</h2>
+					<h2 class="js_history">
+						History
+					</h2>
+				</div>
+				<div class="rate_area">
+					<h3>How do you feel today?</h3>
+					<p class="rate_output">50</p>
+					<div class="slider_area">
+						<input class="rating" type="range" min="0" max="100" value="50">
+					</div>
+				</div>
+				<textarea class="happy_text" type="text" placeholder="+ What makes you happy today?"></textarea>
+				<div class="add_image_area">
+					<div class="add_image">+ Add Image</div>
+				</div>
 
-			<div class="diet_area">
-				<h3 class="title">Diet</h3>
-				<p class="diet_info"></p>
-				<div class="diet_icon"></div>
-			</div>
-			<div class="people_area">
-				<h3 class="title">People</h3>
-				<p class="people_info"></p>
-				<div class="people_icon"></div>
-			</div>
-			<div class="Activities_area">
-				<h3 class="title">Activities</h3>
-				<p class="Activities_info"></p>
-				<div class="activities_icon"></div>
-			</div>
-			<div class="Work_area">
-				<h3 class="title">Work</h3>
-				<p class="Work_info"></p>
-				<div class="apple"></div>
-			</div>
+				<div class="list_area">
 
+					<div class="diet_area">
+						<h3 class="title">Diet</h3>
+						<p class="diet_info"></p>
+						<div class="diet_icon"></div>
+					</div>
+					<div class="people_area">
+						<h3 class="title">People</h3>
+						<p class="people_info"></p>
+						<div class="people_icon"></div>
+					</div>
+					<div class="Activities_area">
+						<h3 class="title">Activities</h3>
+						<p class="Activities_info"></p>
+						<div class="activities_icon"></div>
+					</div>
+					<div class="Work_area">
+						<h3 class="title">Work</h3>
+						<p class="Work_info"></p>
+						<div class="apple"></div>
+					</div>
+
+				</div>
+			</div>
+			<div class="diet_page hidden">
+				<div class="titlebar">
+					<div class="back_icon"><</div><h3>Diet</h3>
+				</div>
+				<div class="eaten_today_area">
+					<h4>Eaten today:</h4>
+					<div class="chosen_area">
+						<div data-itemid="2" class="item chosen"><p class="name">Alcohol2</p></div>
+					</div>
+				</div>
+				<input type="text" class="add_new_food" placeholder="+add new food">
+				<div class="select_area">
+					<div data-itemid="1" class="item"><p class="name">Alcohol1</p></div>
+					<div data-itemid="2" class="item"><p class="name">Alcohol2</p></div>
+					<div data-itemid="3" class="item"><p class="name">Alcohol3</p></div>
+					<div data-itemid="4" class="item"><p class="name">Alcohol4</p></div>
+				</div>
+			</div>
 
 			
 		</div>

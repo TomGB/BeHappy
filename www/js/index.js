@@ -26,7 +26,8 @@ var app = {
 	// Bind any events that are required on startup. Common events are:
 	// 'load', 'deviceready', 'offline', and 'online'.
 	bindEvents: function() {
-		document.addEventListener('deviceready', this.onDeviceReady, false);
+		// document.addEventListener('deviceready', this.onDeviceReady, false);
+		$(app.receivedEvent('jqueryready'));
 	},
 	// deviceready Event Handler
 	//
@@ -37,9 +38,69 @@ var app = {
 	},
 	// Update DOM on a Received Event
 	receivedEvent: function(id) {
-		alert("hi");
+
+
 		$("input.rating").on( "touchmove mousemove change", function(){
 			$(".rate_output").text($("input.rating").val());
 		});
+
+
+		$(".add_image").on("click",function(){
+			alert("upload image");
+		});
+
+
+		$(".diet_area").on("click",function(){
+			$(".home_page").addClass("hidden");
+			$(".diet_page").removeClass("hidden");
+		});
+
+
+		$(".select_area").on("click", ".item", function () {
+			var this_id = $(this).data("itemid");
+			var chosen_items = $(".chosen_area .item");
+			
+			if(has_not_been_chosen(this_id)){
+				$(this).clone().appendTo(".chosen_area");
+			}
+		});
+
+
+		$(".chosen_area").on("click", ".item", function () {
+			$(this).remove();
+		});
+
+		var pressTimer
+
+		$(".select_area").mouseup(function(){
+			clearTimeout(pressTimer)
+			// Clear timeout
+			return false;
+		}).mousedown(function(){
+			// Set timeout
+			pressTimer = window.setTimeout(function() { alert("delete")},500)
+			return false; 
+		});
+
+
+		$(".add_new_food").on("change", function () {
+			if($(this).val()!=""){
+				$("<div class='item'><p class='name'>"+$(this).val()+"</p></div>").appendTo(".chosen_area")
+				$(this).val("");
+			}
+		});
+
+
+		function has_not_been_chosen(the_id) {
+			var matched = false;
+
+			for (var i = chosen_items.length - 1; i >= 0; i--) {
+				if($(chosen_items[i]).data("itemid") == the_id){
+					matched = true;
+				}
+			}
+
+			return !matched;
+		}
 	}
 };
