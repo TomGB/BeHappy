@@ -17,6 +17,7 @@
  * under the License.
  */
 var app = {
+
 	// Application Constructor
 	initialize: function() {
 		this.bindEvents();
@@ -26,8 +27,8 @@ var app = {
 	// Bind any events that are required on startup. Common events are:
 	// 'load', 'deviceready', 'offline', and 'online'.
 	bindEvents: function() {
-		// document.addEventListener('deviceready', this.onDeviceReady, false);
-		$(app.receivedEvent('jqueryready'));
+		document.addEventListener('deviceready', this.onDeviceReady, false);
+		// $(app.receivedEvent('jqueryready'));
 	},
 	// deviceready Event Handler
 	//
@@ -40,6 +41,16 @@ var app = {
 	receivedEvent: function(id) {
 
 
+		var current_page = "home_page";
+
+		document.addEventListener("backbutton", function(e){
+			e.preventDefault();
+			if(current_page!="home_page"){
+				go_back();
+			}
+		}, false);
+
+
 		$("input.rating").on( "touchmove mousemove change", function(){
 			$(".rate_output").text($("input.rating").val());
 		});
@@ -49,58 +60,109 @@ var app = {
 			alert("upload image");
 		});
 
-
-		$(".diet_area").on("click",function(){
+		$(".open_page").on("click",function(){
+			current_page = $(this).attr("id");
 			$(".home_page").addClass("hidden");
-			$(".diet_page").removeClass("hidden");
-		});
+			$(".select_page").removeClass("hidden");
+			$(".today_text").text($(this).data("todaytext"));
 
+			$(".select_page_title").text($(this).find(".title").text());
 
-		$(".select_area").on("click", ".item", function () {
-			var this_id = $(this).data("itemid");
-			var chosen_items = $(".chosen_area .item");
-			
-			if(has_not_been_chosen(this_id)){
-				$(this).clone().appendTo(".chosen_area");
+			$(".options_area").text("");
+
+			var options = $(this).data("options");
+
+			for (var i = 0; i < options.length; i++) {
+				$("<div class='item'><p class='name'>"+options[i]+"</p></div>").appendTo(".options_area"); 
 			}
+
+			$(".selected_area").text("");
+			
+			var selected = $(this).data("selected");
+
+			for (var i = 0; i < selected.length; i++) {
+				$("<div class='item'><p class='name'>"+selected[i]+"</p></div>").appendTo(".selected_area"); 
+			}
+
 		});
 
 
-		$(".chosen_area").on("click", ".item", function () {
+		$(".options_area").on("click", ".item", function () {
+			$(this).clone().appendTo(".selected_area");
+		});
+
+
+		$(".selected_area").on("click", ".item", function () {
 			$(this).remove();
 		});
 
-		var pressTimer
+		var pressTimer;
 
-		$(".select_area").mouseup(function(){
+		var current_item;
+
+		$(".options_area").on("mouseup", ".item", function(){
 			clearTimeout(pressTimer)
 			// Clear timeout
 			return false;
-		}).mousedown(function(){
+		}).on("mousedown", ".item", function(){
+			current_item = $(this);
 			// Set timeout
-			pressTimer = window.setTimeout(function() { alert("delete")},500)
+			pressTimer = window.setTimeout(function() {
+				if (confirm('Would you like to remove '+$(current_item).find(".name").text())+"?") {
+					$(current_item).remove();
+				} else {
+					//
+				}
+			},200)
 			return false; 
 		});
 
 
-		$(".add_new_food").on("change", function () {
+		$(".add_new_item").on("change", function () {
 			if($(this).val()!=""){
-				$("<div class='item'><p class='name'>"+$(this).val()+"</p></div>").appendTo(".chosen_area")
+				$("<div class='item'><p class='name'>"+$(this).val()+"</p></div>").appendTo(".selected_area");
+				$("<div class='item'><p class='name'>"+$(this).val()+"</p></div>").appendTo(".options_area");
 				$(this).val("");
 			}
 		});
 
+		$(".back_icon").on("click",go_back);
 
-		function has_not_been_chosen(the_id) {
-			var matched = false;
+		function get_selected_list() {
 
-			for (var i = chosen_items.length - 1; i >= 0; i--) {
-				if($(chosen_items[i]).data("itemid") == the_id){
-					matched = true;
-				}
+			var output = [];
+
+			var selected_items = $(".selected_area .item");
+
+			for (var i = 0; i < selected_items.length; i++) {
+				// alert($(selected_items[i]).find(".name").text());
+				output.push($(selected_items[i]).find(".name").text());
+			}
+			return output;
+		}
+
+		function get_options_list() {
+
+			var output = [];
+
+			var option_items = $(".options_area .item");
+
+			for (var i = 0; i < option_items.length; i++) {
+				// alert($(option_items[i]).find(".name").text());
+				output.push($(option_items[i]).find(".name").text());
 			}
 
-			return !matched;
+			return output;
 		}
+
+		function go_back(){
+			$(".select_page").addClass("hidden");
+			$(".home_page").removeClass("hidden");
+			$("#"+current_page+" .info").text("");
+			$("#"+current_page+" .info").append(get_selected_list().join(", "));
+			$("#"+current_page).data("selected",get_selected_list());
+			$("#"+current_page).data("options",get_options_list());
+		}
+
 	}
 };

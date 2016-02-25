@@ -128,31 +128,39 @@ p, h1, h2, h3, h4{
     padding: 10px;
 }
 
-.diet_page h3{
+.list_area .title{
+    width: 80%;
+}
+.list_area .info{
+    width: 80%;
+}
+
+.select_page h3{
     padding: 10px;
 }
 
-.diet_page .eaten_today_area{
+.select_page .today_area{
     width: 100%;
     background-color: #ddd;
 }
 
-.diet_page .eaten_today_area h4{
+.select_page .today_area h4{
     width: 100%;
     padding: 10px;
 }
 
-.diet_page .chosen_area{
+.select_page .selected_area{
     width: 100%;
     padding: 20px;
 }
 
-.add_new_food{
+.add_new_item{
     width: 100%;
-    margin: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
-.select_area{
+.options_area{
     padding: 20px;
 }
 
@@ -165,7 +173,7 @@ p, h1, h2, h3, h4{
 }
 
 .back_icon{
-    width: 50px;
+    width: 80px;
     height: 50px;
     text-align: center;
     padding: 10px;

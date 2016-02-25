@@ -57,45 +57,41 @@
 
 				<div class="list_area">
 
-					<div class="diet_area">
+					<div class="open_page" id="diet_area" data-options='["Vegetables","Cereal","Toast","Alcohol"]' data-selected='["Vegetables","Cereal"]' data-todaytext="Eaten today:">
 						<h3 class="title">Diet</h3>
-						<p class="diet_info"></p>
+						<p class="info"></p>
 						<div class="diet_icon"></div>
 					</div>
-					<div class="people_area">
+					<div class="open_page" id="people_area" data-options='["Dad","Best Friend","Boss"]' data-selected='["Dad"]' data-todaytext="Spent time with today:">
 						<h3 class="title">People</h3>
-						<p class="people_info"></p>
+						<p class="info"></p>
 						<div class="people_icon"></div>
 					</div>
-					<div class="Activities_area">
+					<div class="open_page" id="activities_area" data-options='["Sports","Walking","Browsing the Internet","Watching a Movie"]' data-selected='["Walking"]' data-todaytext="Done today:">
 						<h3 class="title">Activities</h3>
-						<p class="Activities_info"></p>
+						<p class="info"></p>
 						<div class="activities_icon"></div>
 					</div>
-					<div class="Work_area">
+					<div class="open_page" id="work_area" data-options='["Made progress","Impressed Boss","Helped College","Finished Project"]' data-selected='' data-todaytext="Work done today:">
 						<h3 class="title">Work</h3>
-						<p class="Work_info"></p>
+						<p class="info"></p>
 						<div class="apple"></div>
 					</div>
 
 				</div>
 			</div>
-			<div class="diet_page hidden">
+			<div class="select_page hidden">
 				<div class="titlebar">
-					<div class="back_icon"><</div><h3>Diet</h3>
+					<div class="back_icon">< save</div>
+					<h3 class="select_page_title"></h3>
 				</div>
-				<div class="eaten_today_area">
-					<h4>Eaten today:</h4>
-					<div class="chosen_area">
-						<div data-itemid="2" class="item chosen"><p class="name">Alcohol2</p></div>
+				<div class="today_area">
+					<h4 class="today_text"></h4>
+					<div class="selected_area">
 					</div>
 				</div>
-				<input type="text" class="add_new_food" placeholder="+add new food">
-				<div class="select_area">
-					<div data-itemid="1" class="item"><p class="name">Alcohol1</p></div>
-					<div data-itemid="2" class="item"><p class="name">Alcohol2</p></div>
-					<div data-itemid="3" class="item"><p class="name">Alcohol3</p></div>
-					<div data-itemid="4" class="item"><p class="name">Alcohol4</p></div>
+				<input type="text" class="add_new_item" placeholder="+add new">
+				<div class="options_area">
 				</div>
 			</div>
 
