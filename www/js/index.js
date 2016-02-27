@@ -50,6 +50,21 @@ var app = {
 			}
 		}, false);
 
+		// function onInitFs(fs) {
+
+		//   fs.root.getFile('log.txt', {create: true, exclusive: true}, function(fileEntry) {
+
+		//     // fileEntry.isFile === true
+		//     // fileEntry.name == 'log.txt'
+		//     // fileEntry.fullPath == '/log.txt'
+		//     alert("hihi");
+
+		//   }, errorHandler);
+
+		// }
+
+		// window.requestFileSystem(window.TEMPORARY, 1024*1024, onInitFs, errorHandler);
+
 
 		$("input.rating").on( "touchmove mousemove change", function(){
 			$(".rate_output").text($("input.rating").val());
