@@ -40,9 +40,9 @@ var app = {
 	// Update DOM on a Received Event
 	receivedEvent: function(id) {
 
-		console.log("device ready event");
+		alert("device ready event");
 
-		console.log(cordova.file.dataDirectory);
+		alert(cordova.file.dataDirectory);
 
 
 		var current_page = "home_page";
@@ -80,7 +80,7 @@ var app = {
 		      break;
 		  };
 
-		  console.log('Error: ' + msg);
+		  alert('Error: ' + msg);
 		}
 
 
@@ -90,31 +90,31 @@ var app = {
 
 		  fs.root.getFile('log.txt', {create: true, exclusive: true}, function(fileEntry) {
 
-		 //    fileEntry.createWriter(function(fileWriter) {
+		    fileEntry.createWriter(function(fileWriter) {
 
-			// 	fileWriter.onwriteend = function(e) {
-			// 		console.log('Write completed.');
-			// 	};
+				fileWriter.onwriteend = function(e) {
+					alert('Write completed.');
+				};
 
-			// 	fileWriter.onerror = function(e) {
-			// 		console.log('Write failed: ' + e.toString());
-			// 	};
+				fileWriter.onerror = function(e) {
+					alert('Write failed: ' + e.toString());
+				};
 
-			// 	// Create a new Blob and write it to log.txt.
-			// 	var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
+				// Create a new Blob and write it to log.txt.
+				var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
 
-			// 	fileWriter.write(blob);
+				fileWriter.write(blob);
 
-			// }, errorHandler);
+			}, errorHandler);
 
 		  }, errorHandler);
 
 		}
 
 		window.webkitStorageInfo.requestQuota(PERSISTENT, 1024*1024, function(grantedBytes) {
-		  window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
+			window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
 		}, function(e) {
-		  console.log('Error', e);
+			alert('Error', e);
 		});
 
 		// window.requestFileSystem(window.TEMPORARY, 1024*1024, onInitFs, errorHandler);

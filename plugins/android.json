@@ -9,7 +9,17 @@
                 "parents": {
                     "/*": [
                         {
+                            "xml": "<feature name=\"Whitelist\"><param name=\"android-package\" value=\"org.apache.cordova.whitelist.WhitelistPlugin\" /><param name=\"onload\" value=\"true\" /></feature>",
+                            "count": 1
+                        },
+                        {
                             "xml": "<feature name=\"File\"><param name=\"android-package\" value=\"org.apache.cordova.file.FileUtils\" /><param name=\"onload\" value=\"true\" /></feature>",
+                            "count": 1
+                        }
+                    ],
+                    "/widget": [
+                        {
+                            "xml": "<feature name=\"Zip\"><param name=\"android-package\" value=\"org.apache.cordova.Zip\" /></feature>",
                             "count": 1
                         }
                     ]
@@ -28,8 +38,14 @@
         }
     },
     "installed_plugins": {
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "uk.co.behappy.app"
+        },
         "cordova-plugin-file": {
-            "PACKAGE_NAME": "uk.co.tombanister.behappy"
+            "PACKAGE_NAME": "uk.co.behappy.app"
+        },
+        "cordova-plugin-zip": {
+            "PACKAGE_NAME": "uk.co.behappy.app"
         }
     },
     "dependent_plugins": {}
