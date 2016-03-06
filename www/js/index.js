@@ -156,6 +156,8 @@ var app = {
 
 		});
 
+		
+
 
 		$(".options_area").on("click", ".item", function () {
 			$(this).clone().appendTo(".selected_area");
