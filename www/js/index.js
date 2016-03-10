@@ -40,7 +40,13 @@ var app = {
 	// Update DOM on a Received Event
 	receivedEvent: function(id) {
 
-		alert("device ready event");
+		var new_data_to_be_written_to_file = false;
+
+		var current_data = {
+		 date: "10/03/2016"
+		};
+
+		var data_array = [];
 
 		var storage_path = "file:///storage/emulated/0/";
 
@@ -56,10 +62,7 @@ var app = {
 			}
 		}, false);
 
-		var ExternalStorageSdcardAccess = function ( _fileHandler, _errorHandler ) {
-
-			var errorHandler = _errorHandler || _defultErrorHandler;
-			var fileHandler = _fileHandler || _defultFileHandler;
+		var ExternalStorageSdcardAccess = function ( fileHandler, errorHandler ) {
 			var root = "file:///";
 
 			return {
@@ -68,49 +71,78 @@ var app = {
 			};
 
 			function scanPath( path ) {
-			    window.resolveLocalFileSystemURL(path, _gotFiles, errorHandler );
+			    window.resolveLocalFileSystemURL(path, gotFiles, errorHandler );
 			}
 
 			function scanRoot() {
 			    scanPath( root );
 			}
 
-			function _gotFiles(entry) {
-			    // ? Check whether the entry is a file or a directory
-			    if (entry.isFile) {
-						alert("file name: "+entry.name);
-			        // * Handle file
-			        // fileHandler( entry );
-			    }
-			    else {
-							alert("is folder");
+			function gotFiles(entry) {
+		    // ? Check whether the entry is a file or a directory
+		    if (entry.isFile) {
+					alert("file name: "+entry.name);
+		        // * Handle file
+		        // fileHandler( entry );
+		    }else {
 
-							entry.getFile("behappy_log.txt", {create: false, exclusive: true}, function(fileEntry) {
+					var dirReader = entry.createReader();
+	        dirReader.readEntries( function(entryList) {
+						if(
+							entryList.find(
+								function(file) {
+									return file.name === 'behappy_log.txt';
+								}
+							)
+						){
+							alert("already exists");
 
-								alert("file entry: "+JSON.stringify(fileEntry));
+							if(new_data_to_be_written_to_file){
 
-								fileEntry.createWriter(function(fileWriter) {
+								entry.getFile('behappy_log.txt', {create: false}, function(fileEntry) {
 
-									fileWriter.onwriteend = function(e) {
-										alert('Write completed.');
-									};
+							    // Create a FileWriter object for our FileEntry (log.txt).
+							    fileEntry.createWriter(function(fileWriter) {
 
-									fileWriter.onerror = function(e) {
-										alert('Write failed: ' + e.toString());
-									};
+							      fileWriter.onwriteend = function(e) {
+							        console.log('Write completed.');
+							      };
 
-									// Create a new Blob and write it to log.txt.
-									var blob = new Blob(['Re write file'], {type: 'text/plain'});
+							      fileWriter.onerror = function(e) {
+							        console.log('Write failed: ' + e.toString());
+							      };
 
-									fileWriter.write(blob);
+							      // Create a new Blob and write it to log.txt.
+							      var blob = new Blob([JSON.stringify(data_array)], {type: 'text/plain'});
 
-								}, errorHandler);
+							      fileWriter.write(blob);
 
-							}, errorHandler);
+										new_data_to_be_written_to_file = false;
+
+							    }, errorHandler);
+
+							  }, errorHandler);
+
+							}else{
+								entry.getFile('behappy_log.txt', {}, function(fileEntry) {
+									fileEntry.file(function(file) {
+							       var reader = new FileReader();
+
+							       reader.onloadend = function(e) {
+							         alert(this.result);
+											 fileHandler(this.result);
+							       };
+
+							       reader.readAsText(file);
+							    }, errorHandler);
+						    }, errorHandler);
+							}
+						}else{
+							alert("doesn't exist, create blank file");
 
 							entry.getFile("behappy_log.txt", {create: true, exclusive: true}, function(fileEntry) {
 
-								alert("file entry: "+JSON.stringify(fileEntry));
+								// alert("file entry: "+JSON.stringify(fileEntry));
 
 								fileEntry.createWriter(function(fileWriter) {
 
@@ -123,22 +155,21 @@ var app = {
 									};
 
 									// Create a new Blob and write it to log.txt.
-									var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
+
+									var blob = new Blob([new_data_to_be_written_to_file?JSON.stringify(data_array):""], {type: 'text/plain'});
 
 									fileWriter.write(blob);
+
+									new_data_to_be_written_to_file = false;
+
+									fileHandler("empty");
 
 								}, errorHandler);
 
 							}, errorHandler);
-			    }
-			}
-
-
-			function _defultFileHandler(fileEntry){
-			    alert( "FileEntry: " + fileEntry.name + " | " + fileEntry.fullPath );
-			}
-			function _defultErrorHandler(error){
-			    alert( 'File System Error: ' + error.code );
+						}
+	        }, errorHandler );
+		    }
 			}
 		};
 
@@ -177,53 +208,49 @@ var app = {
 		  alert('Error: ' + msg);
 		}
 
-		new ExternalStorageSdcardAccess( fileHandler, errorHandler ).scanPath( storage_path );
-		function fileHandler( fileEntry ) {
-			// alert( fileEntry.name + " | " + fileEntry.toURL() );
+		function load_current_file(){
+			new ExternalStorageSdcardAccess( fileHandler, errorHandler ).scanPath( storage_path );
+			function fileHandler( fileEntry ) {
+				data_array = JSON.parse(fileEntry);
+				alert("data loaded from file");
+			}
 		}
 
+		load_current_file();
 
-		//
-		//
-		// function onInitFs(fs) {
-		//
-		// 	fs.root.getFile("file:///storage/emulated/0/test.txt", {create: true, exclusive: true}, function(fileEntry) {
-		//
-		// 		alert("file entry: "+JSON.stringify(fileEntry));
-		//
-		// 		fileEntry.createWriter(function(fileWriter) {
-		//
-		// 			fileWriter.onwriteend = function(e) {
-		// 				alert('Write completed.');
-		// 			};
-		//
-		// 			fileWriter.onerror = function(e) {
-		// 				alert('Write failed: ' + e.toString());
-		// 			};
-		//
-		// 			// Create a new Blob and write it to log.txt.
-		// 			var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
-		//
-		// 			fileWriter.write(blob);
-		//
-		// 		}, errorHandler);
-		//
-		// 	}, errorHandler);
-		//
-		// }
-		//
-		// window.webkitStorageInfo.requestQuota(PERSISTENT, 1024*1024, function(grantedBytes) {
-		// 	window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
-		// }, function(e) {
-		// 	alert('Error', e);
-		// });
+		function update_file(data_to_update){
 
-		// window.requestFileSystem(window.TEMPORARY, 1024*1024, onInitFs, errorHandler);
+			function findWithAttr(array, attr, value) {
+		    for(var i = 0; i < array.length; i += 1) {
+	        if(array[i][attr] === value) {
+            return i;
+	        }
+		    }
+			}
 
+			var index = findWithAttr(data_array,"date",data_to_update.date);
 
+			if(index != undefined){
+				data_array[index] = data_to_update;
+			}else{
+				data_array.push(data_to_update);
+			}
+
+			new ExternalStorageSdcardAccess( fileHandler, errorHandler ).scanPath( storage_path );
+			function fileHandler( fileEntry ) {
+				data_array = JSON.parse(fileEntry);
+				alert("data loaded from file");
+			}
+		}
 
 		$("input.rating").on( "touchmove mousemove change", function(){
 			$(".rate_output").text($("input.rating").val());
+			current_data.score = $("input.rating").val();
+		});
+
+		$("input.rating").on("change", function() {
+			new_data_to_be_written_to_file = true;
+			update_file(current_data);
 		});
 
 
@@ -335,6 +362,8 @@ var app = {
 			$("#"+current_page+" .info").append(get_selected_list().join(", "));
 			$("#"+current_page).data("selected",get_selected_list());
 			$("#"+current_page).data("options",get_options_list());
+			current_data.current_page = get_selected_list();
+			update_file(current_data);
 		}
 
 	}
