@@ -42,7 +42,9 @@ var app = {
 
 		alert("device ready event");
 
-		alert(cordova.file.dataDirectory);
+		var storage_path = "file:///storage/emulated/0/";
+
+		alert("the data directory: "+storage_path);
 
 
 		var current_page = "home_page";
@@ -53,6 +55,92 @@ var app = {
 				go_back();
 			}
 		}, false);
+
+		var ExternalStorageSdcardAccess = function ( _fileHandler, _errorHandler ) {
+
+			var errorHandler = _errorHandler || _defultErrorHandler;
+			var fileHandler = _fileHandler || _defultFileHandler;
+			var root = "file:///";
+
+			return {
+			    scanRoot:scanRoot,
+			    scanPath:scanPath
+			};
+
+			function scanPath( path ) {
+			    window.resolveLocalFileSystemURL(path, _gotFiles, errorHandler );
+			}
+
+			function scanRoot() {
+			    scanPath( root );
+			}
+
+			function _gotFiles(entry) {
+			    // ? Check whether the entry is a file or a directory
+			    if (entry.isFile) {
+						alert("file name: "+entry.name);
+			        // * Handle file
+			        // fileHandler( entry );
+			    }
+			    else {
+							alert("is folder");
+
+							entry.getFile("behappy_log.txt", {create: false, exclusive: true}, function(fileEntry) {
+
+								alert("file entry: "+JSON.stringify(fileEntry));
+
+								fileEntry.createWriter(function(fileWriter) {
+
+									fileWriter.onwriteend = function(e) {
+										alert('Write completed.');
+									};
+
+									fileWriter.onerror = function(e) {
+										alert('Write failed: ' + e.toString());
+									};
+
+									// Create a new Blob and write it to log.txt.
+									var blob = new Blob(['Re write file'], {type: 'text/plain'});
+
+									fileWriter.write(blob);
+
+								}, errorHandler);
+
+							}, errorHandler);
+
+							entry.getFile("behappy_log.txt", {create: true, exclusive: true}, function(fileEntry) {
+
+								alert("file entry: "+JSON.stringify(fileEntry));
+
+								fileEntry.createWriter(function(fileWriter) {
+
+									fileWriter.onwriteend = function(e) {
+										alert('Write completed.');
+									};
+
+									fileWriter.onerror = function(e) {
+										alert('Write failed: ' + e.toString());
+									};
+
+									// Create a new Blob and write it to log.txt.
+									var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
+
+									fileWriter.write(blob);
+
+								}, errorHandler);
+
+							}, errorHandler);
+			    }
+			}
+
+
+			function _defultFileHandler(fileEntry){
+			    alert( "FileEntry: " + fileEntry.name + " | " + fileEntry.fullPath );
+			}
+			function _defultErrorHandler(error){
+			    alert( 'File System Error: ' + error.code );
+			}
+		};
 
 
 
@@ -75,6 +163,12 @@ var app = {
 		    case FileError.INVALID_STATE_ERR:
 		      msg = 'INVALID_STATE_ERR';
 		      break;
+		    case FileError.PATH_EXISTS_ERR:
+		      msg = 'PATH_EXISTS_ERR (file may already exist)';
+		      break;
+		    case FileError.ENCODING_ERR:
+		      msg = 'ENCODING_ERR (error 5, problem with url maybe?)';
+		      break;
 		    default:
 		      msg = JSON.stringify(e);
 		      break;
@@ -83,43 +177,50 @@ var app = {
 		  alert('Error: ' + msg);
 		}
 
-
-
-
-		function onInitFs(fs) {
-
-		  fs.root.getFile('log.txt', {create: true, exclusive: true}, function(fileEntry) {
-
-		    fileEntry.createWriter(function(fileWriter) {
-
-				fileWriter.onwriteend = function(e) {
-					alert('Write completed.');
-				};
-
-				fileWriter.onerror = function(e) {
-					alert('Write failed: ' + e.toString());
-				};
-
-				// Create a new Blob and write it to log.txt.
-				var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
-
-				fileWriter.write(blob);
-
-			}, errorHandler);
-
-		  }, errorHandler);
-
+		new ExternalStorageSdcardAccess( fileHandler, errorHandler ).scanPath( storage_path );
+		function fileHandler( fileEntry ) {
+			// alert( fileEntry.name + " | " + fileEntry.toURL() );
 		}
 
-		window.webkitStorageInfo.requestQuota(PERSISTENT, 1024*1024, function(grantedBytes) {
-			window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
-		}, function(e) {
-			alert('Error', e);
-		});
+
+		//
+		//
+		// function onInitFs(fs) {
+		//
+		// 	fs.root.getFile("file:///storage/emulated/0/test.txt", {create: true, exclusive: true}, function(fileEntry) {
+		//
+		// 		alert("file entry: "+JSON.stringify(fileEntry));
+		//
+		// 		fileEntry.createWriter(function(fileWriter) {
+		//
+		// 			fileWriter.onwriteend = function(e) {
+		// 				alert('Write completed.');
+		// 			};
+		//
+		// 			fileWriter.onerror = function(e) {
+		// 				alert('Write failed: ' + e.toString());
+		// 			};
+		//
+		// 			// Create a new Blob and write it to log.txt.
+		// 			var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
+		//
+		// 			fileWriter.write(blob);
+		//
+		// 		}, errorHandler);
+		//
+		// 	}, errorHandler);
+		//
+		// }
+		//
+		// window.webkitStorageInfo.requestQuota(PERSISTENT, 1024*1024, function(grantedBytes) {
+		// 	window.requestFileSystem(PERSISTENT, grantedBytes, onInitFs, errorHandler);
+		// }, function(e) {
+		// 	alert('Error', e);
+		// });
 
 		// window.requestFileSystem(window.TEMPORARY, 1024*1024, onInitFs, errorHandler);
 
-		
+
 
 		$("input.rating").on( "touchmove mousemove change", function(){
 			$(".rate_output").text($("input.rating").val());
@@ -143,20 +244,20 @@ var app = {
 			var options = $(this).data("options");
 
 			for (var i = 0; i < options.length; i++) {
-				$("<div class='item'><p class='name'>"+options[i]+"</p></div>").appendTo(".options_area"); 
+				$("<div class='item'><p class='name'>"+options[i]+"</p></div>").appendTo(".options_area");
 			}
 
 			$(".selected_area").text("");
-			
+
 			var selected = $(this).data("selected");
 
 			for (var i = 0; i < selected.length; i++) {
-				$("<div class='item'><p class='name'>"+selected[i]+"</p></div>").appendTo(".selected_area"); 
+				$("<div class='item'><p class='name'>"+selected[i]+"</p></div>").appendTo(".selected_area");
 			}
 
 		});
 
-		
+
 
 
 		$(".options_area").on("click", ".item", function () {
@@ -186,7 +287,7 @@ var app = {
 					//
 				}
 			},200)
-			return false; 
+			return false;
 		});
 
 

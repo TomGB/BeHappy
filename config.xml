@@ -76,6 +76,8 @@
     <allow-intent href="geo:*" />
     <platform name="android">
         <allow-intent href="market:*" />
+        <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+        <preference name="AndroidExtraFilesystems" value="sdcard,cache" />
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />

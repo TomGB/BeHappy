@@ -42,7 +42,7 @@ var app = {
 
 		alert("device ready event");
 
-		alert(cordova.file.dataDirectory);
+		alert("the data directory: "+""+cordova.file.externalRootDirectory+"hi/");
 
 
 		var current_page = "home_page";
@@ -75,6 +75,12 @@ var app = {
 		    case FileError.INVALID_STATE_ERR:
 		      msg = 'INVALID_STATE_ERR';
 		      break;
+		    case FileError.PATH_EXISTS_ERR:
+		      msg = 'PATH_EXISTS_ERR (file may already exist)';
+		      break;
+		    case FileError.ENCODING_ERR:
+		      msg = 'ENCODING_ERR (error 5, problem with url maybe?)';
+		      break;
 		    default:
 		      msg = JSON.stringify(e);
 		      break;
@@ -88,26 +94,28 @@ var app = {
 
 		function onInitFs(fs) {
 
-		  fs.root.getFile('log.txt', {create: true, exclusive: true}, function(fileEntry) {
+			fs.root.getFile(""+cordova.file.externalRootDirectory+"hi/", {create: true, exclusive: true}, function(fileEntry) {
 
-		    fileEntry.createWriter(function(fileWriter) {
+				alert("file entry: "+JSON.stringify(fileEntry));
 
-				fileWriter.onwriteend = function(e) {
-					alert('Write completed.');
-				};
+				fileEntry.createWriter(function(fileWriter) {
 
-				fileWriter.onerror = function(e) {
-					alert('Write failed: ' + e.toString());
-				};
+					fileWriter.onwriteend = function(e) {
+						alert('Write completed.');
+					};
 
-				// Create a new Blob and write it to log.txt.
-				var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
+					fileWriter.onerror = function(e) {
+						alert('Write failed: ' + e.toString());
+					};
 
-				fileWriter.write(blob);
+					// Create a new Blob and write it to log.txt.
+					var blob = new Blob(['Lorem Ipsum'], {type: 'text/plain'});
+
+					fileWriter.write(blob);
+
+				}, errorHandler);
 
 			}, errorHandler);
-
-		  }, errorHandler);
 
 		}
 
@@ -119,7 +127,7 @@ var app = {
 
 		// window.requestFileSystem(window.TEMPORARY, 1024*1024, onInitFs, errorHandler);
 
-		
+
 
 		$("input.rating").on( "touchmove mousemove change", function(){
 			$(".rate_output").text($("input.rating").val());
@@ -143,18 +151,20 @@ var app = {
 			var options = $(this).data("options");
 
 			for (var i = 0; i < options.length; i++) {
-				$("<div class='item'><p class='name'>"+options[i]+"</p></div>").appendTo(".options_area"); 
+				$("<div class='item'><p class='name'>"+options[i]+"</p></div>").appendTo(".options_area");
 			}
 
 			$(".selected_area").text("");
-			
+
 			var selected = $(this).data("selected");
 
 			for (var i = 0; i < selected.length; i++) {
-				$("<div class='item'><p class='name'>"+selected[i]+"</p></div>").appendTo(".selected_area"); 
+				$("<div class='item'><p class='name'>"+selected[i]+"</p></div>").appendTo(".selected_area");
 			}
 
 		});
+
+
 
 
 		$(".options_area").on("click", ".item", function () {
@@ -184,7 +194,7 @@ var app = {
 					//
 				}
 			},200)
-			return false; 
+			return false;
 		});
 
 
