@@ -40,15 +40,42 @@ var app = {
 	// Update DOM on a Received Event
 	receivedEvent: function(id) {
 
+		var today = new Date();
+		var dd = today.getDate();
+		var mm = today.getMonth()+1; //January is 0!
+		var yyyy = today.getFullYear();
+
+		if(dd<10) {
+		    dd='0'+dd
+		}
+
+		if(mm<10) {
+		    mm='0'+mm
+		}
+
+		today = dd+'/'+mm+'/'+yyyy;
+
+		var selected_date = today;
+
+		$(".selected_date").text(selected_date);
+
 		var new_data_to_be_written_to_file = false;
 
 		var current_data = {
-		 date: "10/03/2016"
+		 date: today
 		};
 
 		var data_array = [];
 
-		var storage_path = "file:///storage/emulated/0/";
+		var config_object = {
+			name: "config_object",
+			diet: ["vegetables", "joylent", "chocolate","Cereal","Toast", "alcohol"],
+			people: ["Dad","Best Friend","Boss"],
+			activities: ["Sports","Walking","Browsing the Internet","Watching a Movie"],
+			work: ["Made progress","Impressed Boss","Helped College","Finished Project"]
+		};
+
+		var storage_path = cordova.file.externalRootDirectory;
 
 		alert("the data directory: "+storage_path);
 
@@ -95,7 +122,7 @@ var app = {
 								}
 							)
 						){
-							alert("already exists");
+							// alert("already exists");
 
 							if(new_data_to_be_written_to_file){
 
@@ -129,7 +156,7 @@ var app = {
 							       var reader = new FileReader();
 
 							       reader.onloadend = function(e) {
-							         alert(this.result);
+							        //  alert(this.result);
 											 fileHandler(this.result);
 							       };
 
@@ -138,7 +165,7 @@ var app = {
 						    }, errorHandler);
 							}
 						}else{
-							alert("doesn't exist, create blank file");
+							// alert("doesn't exist, create blank file");
 
 							entry.getFile("behappy_log.txt", {create: true, exclusive: true}, function(fileEntry) {
 
@@ -165,7 +192,6 @@ var app = {
 									fileHandler("empty");
 
 								}, errorHandler);
-
 							}, errorHandler);
 						}
 	        }, errorHandler );
@@ -254,6 +280,31 @@ var app = {
 					}
 				});
 			}
+
+			index = findWithAttr(data_array, "name", "config_object");
+
+			if(index != undefined){
+
+				var section_names = [];
+				$(".open_page").each(function(){
+					section_names.push(this.id);
+				});
+
+				$(section_names).each(function() {
+					// alert(this);
+					if(data_array[index].hasOwnProperty(this)){
+
+						$("#"+this).data("options",data_array[index][this]);
+						config_object[this] = data_array[index][this];
+					}
+				});
+			}
+
+			$(data_array).each(function() {
+				if (this.hasOwnProperty('date')) {
+				  $(".day_list").append('<div class="day"><h1>'+this.date+'</h1><h2>'+this.score+'</h2></div>');
+				}
+			});
 		}
 
 		function findWithAttr(array, attr, value) {
@@ -266,6 +317,8 @@ var app = {
 
 		function update_file(data_to_update){
 
+			// alert("call to update_file");
+
 			new_data_to_be_written_to_file = true;
 
 			var index = findWithAttr(data_array,"date",data_to_update.date);
@@ -276,12 +329,113 @@ var app = {
 				data_array.push(data_to_update);
 			}
 
+			index = findWithAttr(data_array,"name","config_object");
+
+			if(index != undefined){
+				data_array[index] = config_object;
+			}else{
+				data_array.push(config_object);
+			}
+
 			new ExternalStorageSdcardAccess( fileHandler, errorHandler ).scanPath( storage_path );
 			function fileHandler( fileEntry ) {
 				data_array = JSON.parse(fileEntry);
 				alert("data loaded from file");
 			}
 		}
+
+		$(".add_new_date").click(function() {
+			$(".date_picker").click();
+		});
+
+		$(".date_picker").change(function() {
+
+			var today = new Date($(this).val());
+			var dd = today.getDate();
+			var mm = today.getMonth()+1; //January is 0!
+			var yyyy = today.getFullYear();
+
+			if(dd<10) {
+			    dd='0'+dd
+			}
+
+			if(mm<10) {
+			    mm='0'+mm
+			}
+
+			today = dd+'/'+mm+'/'+yyyy;
+
+			selected_date = today;
+
+			var index = findWithAttr(data_array, "date", selected_date);
+
+			current_data = {};
+			current_data.date = selected_date;
+
+			if(index != undefined){
+
+				$(".selected_date").text(selected_date);
+
+				if(data_array[index].hasOwnProperty("score")){
+					$(".rate_output").text(data_array[index].score);
+					$("input.rating").val(data_array[index].score);
+					current_data.score = data_array[index].score;
+				}
+				if(data_array[index].hasOwnProperty("text")){
+					$(".happy_text").val(data_array[index].text);
+					current_data.text = data_array[index].text;
+				}
+
+				var section_names = [];
+				$(".open_page").each(function(){
+					section_names.push(this.id);
+				});
+
+				// alert(section_names);
+
+				$(section_names).each(function() {
+					// alert(this);
+					if(data_array[index].hasOwnProperty(this)){
+
+
+						$("#"+this+" .info").text("");
+						$("#"+this+" .info").append(data_array[index][this].join(", "));
+						$("#"+this).data("selected",data_array[index][this]);
+						current_data[this] = data_array[index][this];
+					}
+				});
+			}else{
+
+				// alert("day not found");
+
+				$(".day_list").append('<div class="day"><h1>'+current_data.date+'</h1><h2 class="day_score"></h2></div>');
+
+				$(".selected_date").text(selected_date);
+
+				$(".rate_output").text(50);
+				$("input.rating").val(50);
+				current_data.score = 50;
+
+				// alert("score set");
+
+				$(".happy_text").val("");
+				current_data.text = "";
+
+				// alert("text set");
+
+				$(".open_page").each(function() {
+					$(this).data("selected","");
+					$(this).find(".info").text("");
+				});
+
+				// alert("rest set");
+			}
+			//
+			$(".page").addClass("hidden");
+			$(".home_page").removeClass("hidden");
+
+			// alert("home page should be showing");
+		});
 
 		$(".happy_text").on("change", function(){
 			current_data.text = $(this).val();
@@ -297,6 +451,71 @@ var app = {
 			update_file(current_data);
 		});
 
+		$(".js_history").click(function() {
+			$(".page").addClass("hidden");
+			$(".date_page").removeClass("hidden");
+		});
+
+		$(".date_page").on("click",".day",function() {
+			selected_date = $(this).find("h1").text();
+			$(".selected_date").text(selected_date);
+
+			current_data.date = selected_date;
+
+			var index = findWithAttr(data_array, "date", selected_date);
+
+			if(index != undefined){
+				if(data_array[index].hasOwnProperty("score")){
+					$(".rate_output").text(data_array[index].score);
+					$("input.rating").val(data_array[index].score);
+					current_data.score = data_array[index].score;
+				}
+				if(data_array[index].hasOwnProperty("text")){
+					$(".happy_text").val(data_array[index].text);
+					current_data.text = data_array[index].text;
+				}
+
+				var section_names = [];
+				$(".open_page").each(function(){
+					section_names.push(this.id);
+				});
+
+				// alert(section_names);
+
+				$(section_names).each(function() {
+					// alert(this);
+					if(data_array[index].hasOwnProperty(this)){
+
+
+						$("#"+this+" .info").text("");
+						$("#"+this+" .info").append(data_array[index][this].join(", "));
+						$("#"+this).data("selected",data_array[index][this]);
+						current_data[this] = data_array[index][this];
+					}
+				});
+			}else{
+
+				current_date = {};
+
+				current_date.date = selected_date;
+
+				$(".rate_output").text(50);
+				$("input.rating").val(50);
+				current_data.score = 50;
+
+				$(".happy_text").val("");
+				current_data.text = "";
+
+				$(".open_page").each(function() {
+					$(this).data("selected","");
+					$(this).find(".info").text("");
+				});
+			}
+
+			$(".page").addClass("hidden");
+			$(".home_page").removeClass("hidden");
+		});
+
 
 		$(".add_image").on("click",function(){
 			alert("upload image");
@@ -304,7 +523,7 @@ var app = {
 
 		$(".open_page").on("click",function(){
 			current_page = $(this).attr("id");
-			$(".home_page").addClass("hidden");
+			$(".page").addClass("hidden");
 			$(".select_page").removeClass("hidden");
 			$(".today_text").text($(this).data("todaytext"));
 
@@ -400,13 +619,14 @@ var app = {
 		}
 
 		function go_back(){
-			$(".select_page").addClass("hidden");
+			$(".page").addClass("hidden");
 			$(".home_page").removeClass("hidden");
 			$("#"+current_page+" .info").text("");
 			$("#"+current_page+" .info").append(get_selected_list().join(", "));
 			$("#"+current_page).data("selected",get_selected_list());
 			$("#"+current_page).data("options",get_options_list());
 			current_data[current_page] = get_selected_list();
+			config_object[current_page] = get_options_list();
 			update_file(current_data);
 		}
 

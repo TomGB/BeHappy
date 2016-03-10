@@ -31,16 +31,23 @@
 	</head>
 	<body>
 		<div class="app">
-			<div class="home_page">
+			<div class="date_page page hidden">
+				<input type="date" name="date" class="date_picker" placeholder="Add New Date" />
+				<h1 class="add_new_date">Add day</h1>
+				<div class="day_list">
+
+				</div>
+			</div>
+			<div class="home_page page">
 				<div class="titlebar">
 					<div class="logo"></div><h1>Be <span class="happy">Happy</span></h1>
 				</div>
 				<div class="time_buttons">
-					<h2 class="js_today">
-						Today
-					</h2>
 					<h2 class="js_history">
 						History
+					</h2>
+					<h2 class="selected_date">
+
 					</h2>
 				</div>
 				<div class="rate_area">
@@ -51,28 +58,28 @@
 					</div>
 				</div>
 				<textarea class="happy_text" type="text" placeholder="+ What makes you happy today?"></textarea>
-				<div class="add_image_area">
+				<!-- <div class="add_image_area">
 					<div class="add_image">+ Add Image</div>
-				</div>
+				</div> -->
 
 				<div class="list_area">
 
-					<div class="open_page" id="diet_area" data-options='["Vegetables","Cereal","Toast","Alcohol"]' data-selected='["Vegetables","Cereal"]' data-todaytext="Eaten today:">
+					<div class="open_page" id="diet" data-options='["Vegetables","Cereal","Toast","Alcohol"]' data-selected='' data-todaytext="Eaten today:">
 						<h3 class="title">Diet</h3>
 						<p class="info"></p>
 						<div class="diet_icon"></div>
 					</div>
-					<div class="open_page" id="people_area" data-options='["Dad","Best Friend","Boss"]' data-selected='["Dad"]' data-todaytext="Spent time with today:">
+					<div class="open_page" id="people" data-options='["Dad","Best Friend","Boss"]' data-selected='' data-todaytext="Spent time with today:">
 						<h3 class="title">People</h3>
 						<p class="info"></p>
 						<div class="people_icon"></div>
 					</div>
-					<div class="open_page" id="activities_area" data-options='["Sports","Walking","Browsing the Internet","Watching a Movie"]' data-selected='["Walking"]' data-todaytext="Done today:">
+					<div class="open_page" id="activities" data-options='["Sports","Walking","Browsing the Internet","Watching a Movie"]' data-selected='' data-todaytext="Done today:">
 						<h3 class="title">Activities</h3>
 						<p class="info"></p>
 						<div class="activities_icon"></div>
 					</div>
-					<div class="open_page" id="work_area" data-options='["Made progress","Impressed Boss","Helped College","Finished Project"]' data-selected='' data-todaytext="Work done today:">
+					<div class="open_page" id="work" data-options='["Made progress","Impressed Boss","Helped College","Finished Project"]' data-selected='' data-todaytext="Work done today:">
 						<h3 class="title">Work</h3>
 						<p class="info"></p>
 						<div class="apple"></div>
@@ -80,7 +87,7 @@
 
 				</div>
 			</div>
-			<div class="select_page hidden">
+			<div class="select_page page hidden">
 				<div class="titlebar">
 					<div class="back_icon">< save</div>
 					<h3 class="select_page_title"></h3>
