@@ -40,29 +40,36 @@ var app = {
 	// Update DOM on a Received Event
 	receivedEvent: function(id) {
 
-		var today = new Date();
-		var dd = today.getDate();
-		var mm = today.getMonth()+1; //January is 0!
-		var yyyy = today.getFullYear();
+		function format_date(input_date){
+			var temp_date;
+			if(input_date == null){
+				temp_date = new Date();
+			}else{
+				temp_date = new Date(input_date);
+			}
+			var dd = temp_date.getDate();
+			var mm = temp_date.getMonth()+1; //January is 0!
+			var yyyy = temp_date.getFullYear();
 
-		if(dd<10) {
-		    dd='0'+dd
+			if(dd<10) {
+			    dd='0'+dd
+			}
+
+			if(mm<10) {
+			    mm='0'+mm
+			}
+
+			return dd+'/'+mm+'/'+yyyy;
 		}
 
-		if(mm<10) {
-		    mm='0'+mm
-		}
-
-		today = dd+'/'+mm+'/'+yyyy;
-
-		var selected_date = today;
+		var selected_date = format_date();
 
 		$(".selected_date").text(selected_date);
 
 		var new_data_to_be_written_to_file = false;
 
 		var current_data = {
-		 date: today
+		 date: selected_date
 		};
 
 		var data_array = [];
@@ -349,23 +356,14 @@ var app = {
 		});
 
 		$(".date_picker").change(function() {
+			load_date(format_date($(this).val()));
+		});
 
-			var today = new Date($(this).val());
-			var dd = today.getDate();
-			var mm = today.getMonth()+1; //January is 0!
-			var yyyy = today.getFullYear();
+		function load_date(input_date) {
 
-			if(dd<10) {
-			    dd='0'+dd
-			}
+			selected_date = input_date;
 
-			if(mm<10) {
-			    mm='0'+mm
-			}
-
-			today = dd+'/'+mm+'/'+yyyy;
-
-			selected_date = today;
+			$(".selected_date").text(selected_date);
 
 			var index = findWithAttr(data_array, "date", selected_date);
 
@@ -373,9 +371,6 @@ var app = {
 			current_data.date = selected_date;
 
 			if(index != undefined){
-
-				$(".selected_date").text(selected_date);
-
 				if(data_array[index].hasOwnProperty("score")){
 					$(".rate_output").text(data_array[index].score);
 					$("input.rating").val(data_array[index].score);
@@ -404,38 +399,28 @@ var app = {
 						current_data[this] = data_array[index][this];
 					}
 				});
-			}else{
-
-				// alert("day not found");
+			}else{ // day not found
 
 				$(".day_list").append('<div class="day"><h1>'+current_data.date+'</h1><h2 class="day_score"></h2></div>');
-
-				$(".selected_date").text(selected_date);
 
 				$(".rate_output").text(50);
 				$("input.rating").val(50);
 				current_data.score = 50;
 
-				// alert("score set");
-
 				$(".happy_text").val("");
 				current_data.text = "";
-
-				// alert("text set");
 
 				$(".open_page").each(function() {
 					$(this).data("selected","");
 					$(this).find(".info").text("");
 				});
-
-				// alert("rest set");
 			}
 			//
 			$(".page").addClass("hidden");
 			$(".home_page").removeClass("hidden");
 
 			// alert("home page should be showing");
-		});
+		};
 
 		$(".happy_text").on("change", function(){
 			current_data.text = $(this).val();
@@ -457,63 +442,7 @@ var app = {
 		});
 
 		$(".date_page").on("click",".day",function() {
-			selected_date = $(this).find("h1").text();
-			$(".selected_date").text(selected_date);
-
-			current_data.date = selected_date;
-
-			var index = findWithAttr(data_array, "date", selected_date);
-
-			if(index != undefined){
-				if(data_array[index].hasOwnProperty("score")){
-					$(".rate_output").text(data_array[index].score);
-					$("input.rating").val(data_array[index].score);
-					current_data.score = data_array[index].score;
-				}
-				if(data_array[index].hasOwnProperty("text")){
-					$(".happy_text").val(data_array[index].text);
-					current_data.text = data_array[index].text;
-				}
-
-				var section_names = [];
-				$(".open_page").each(function(){
-					section_names.push(this.id);
-				});
-
-				// alert(section_names);
-
-				$(section_names).each(function() {
-					// alert(this);
-					if(data_array[index].hasOwnProperty(this)){
-
-
-						$("#"+this+" .info").text("");
-						$("#"+this+" .info").append(data_array[index][this].join(", "));
-						$("#"+this).data("selected",data_array[index][this]);
-						current_data[this] = data_array[index][this];
-					}
-				});
-			}else{
-
-				current_date = {};
-
-				current_date.date = selected_date;
-
-				$(".rate_output").text(50);
-				$("input.rating").val(50);
-				current_data.score = 50;
-
-				$(".happy_text").val("");
-				current_data.text = "";
-
-				$(".open_page").each(function() {
-					$(this).data("selected","");
-					$(this).find(".info").text("");
-				});
-			}
-
-			$(".page").addClass("hidden");
-			$(".home_page").removeClass("hidden");
+			load_date($(this).find("h1").text());
 		});
 
 
@@ -592,29 +521,20 @@ var app = {
 		$(".back_icon").on("click",go_back);
 
 		function get_selected_list() {
-
-			var output = [];
-
 			var selected_items = $(".selected_area .item");
-
+			var output = [];
 			for (var i = 0; i < selected_items.length; i++) {
-				// alert($(selected_items[i]).find(".name").text());
 				output.push($(selected_items[i]).find(".name").text());
 			}
 			return output;
 		}
 
 		function get_options_list() {
-
-			var output = [];
-
 			var option_items = $(".options_area .item");
-
+			var output = [];
 			for (var i = 0; i < option_items.length; i++) {
-				// alert($(option_items[i]).find(".name").text());
 				output.push($(option_items[i]).find(".name").text());
 			}
-
 			return output;
 		}
 

@@ -13,7 +13,8 @@
         <param name="android-package" value="org.apache.cordova.Zip" />
     </feature>
     <allow-intent href="market:*" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+    <preference name="AndroidExtraFilesystems" value="sdcard,cache" />
     <name>Be Happy</name>
     <description>
         Hello World sample application that responds to the deviceready event.
