@@ -212,21 +212,61 @@ var app = {
 			new ExternalStorageSdcardAccess( fileHandler, errorHandler ).scanPath( storage_path );
 			function fileHandler( fileEntry ) {
 				data_array = JSON.parse(fileEntry);
+
+				process_data_array();
+
 				alert("data loaded from file");
 			}
 		}
 
 		load_current_file();
 
+		function process_data_array() {
+			var index = findWithAttr(data_array, "date", current_data.date);
+
+			if(index != undefined){
+				if(data_array[index].hasOwnProperty("score")){
+					$(".rate_output").text(data_array[index].score);
+					$("input.rating").val(data_array[index].score);
+					current_data.score = data_array[index].score;
+				}
+				if(data_array[index].hasOwnProperty("text")){
+					$(".happy_text").val(data_array[index].text);
+					current_data.text = data_array[index].text;
+				}
+
+				var section_names = [];
+				$(".open_page").each(function(){
+					section_names.push(this.id);
+				});
+
+				// alert(section_names);
+
+				$(section_names).each(function() {
+					// alert(this);
+					if(data_array[index].hasOwnProperty(this)){
+
+
+						$("#"+this+" .info").text("");
+						$("#"+this+" .info").append(data_array[index][this].join(", "));
+						$("#"+this).data("selected",data_array[index][this]);
+						current_data[this] = data_array[index][this];
+					}
+				});
+			}
+		}
+
+		function findWithAttr(array, attr, value) {
+			for(var i = 0; i < array.length; i += 1) {
+				if(array[i][attr] === value) {
+					return i;
+				}
+			}
+		}
+
 		function update_file(data_to_update){
 
-			function findWithAttr(array, attr, value) {
-		    for(var i = 0; i < array.length; i += 1) {
-	        if(array[i][attr] === value) {
-            return i;
-	        }
-		    }
-			}
+			new_data_to_be_written_to_file = true;
 
 			var index = findWithAttr(data_array,"date",data_to_update.date);
 
@@ -243,13 +283,17 @@ var app = {
 			}
 		}
 
+		$(".happy_text").on("change", function(){
+			current_data.text = $(this).val();
+			update_file(current_data);
+		});
+
 		$("input.rating").on( "touchmove mousemove change", function(){
 			$(".rate_output").text($("input.rating").val());
 			current_data.score = $("input.rating").val();
 		});
 
 		$("input.rating").on("change", function() {
-			new_data_to_be_written_to_file = true;
 			update_file(current_data);
 		});
 
@@ -362,7 +406,7 @@ var app = {
 			$("#"+current_page+" .info").append(get_selected_list().join(", "));
 			$("#"+current_page).data("selected",get_selected_list());
 			$("#"+current_page).data("options",get_options_list());
-			current_data.current_page = get_selected_list();
+			current_data[current_page] = get_selected_list();
 			update_file(current_data);
 		}
 
