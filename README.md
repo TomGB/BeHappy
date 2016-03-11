@@ -24,6 +24,9 @@ load_date()
   loads the selected date from the data_array
   then updates the DOM with that information
 
+go_back()
+  method when back button is pressed to go from item selection to day view
+
 MISC
   Changing pages, setting pages to displayed and hidden,
   updating bits of the DOM such as currently selected date
@@ -48,8 +51,8 @@ data_array:
 current_data:
   stores all the info about the currently selected date
 
-selected_date:
+// no long used: selected_date:
   The date that is currently being shown in the home_page
 
 config_object:
-  Contains the defaults for each of the catagories such as diet, people, work, activities
+  Contains the defaults for each of the categories such as diet, people, work, activities
