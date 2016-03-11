@@ -62,15 +62,12 @@ var app = {
 			return dd+'/'+mm+'/'+yyyy;
 		}
 
-		var selected_date = format_date();
-
-		$(".selected_date").text(selected_date);
-
 		var new_data_to_be_written_to_file = false;
 
-		var current_data = {
-		 date: selected_date
-		};
+		var current_data = {};
+		current_data.date = format_date();
+
+		$(".selected_date").text(current_data.date);
 
 		var data_array = [];
 
@@ -84,8 +81,7 @@ var app = {
 
 		var storage_path = cordova.file.externalRootDirectory;
 
-		alert("the data directory: "+storage_path);
-
+		$(".save_location").text(storage_path);
 
 		var current_page = "home_page";
 
@@ -113,22 +109,12 @@ var app = {
 			}
 
 			function gotFiles(entry) {
-		    // ? Check whether the entry is a file or a directory
-		    if (entry.isFile) {
-					alert("file name: "+entry.name);
-		        // * Handle file
-		        // fileHandler( entry );
-		    }else {
-
+		    if (entry.isDirectory){
 					var dirReader = entry.createReader();
 	        dirReader.readEntries( function(entryList) {
-						if(
-							entryList.find(
-								function(file) {
-									return file.name === 'behappy_log.txt';
-								}
-							)
-						){
+						if(entryList.find(function(file) {
+							return file.name === 'behappy_log.txt';
+						})){
 							// alert("already exists");
 
 							if(new_data_to_be_written_to_file){
@@ -206,8 +192,6 @@ var app = {
 			}
 		};
 
-
-
 		function errorHandler(e) {
 		  var msg = '';
 
@@ -254,38 +238,44 @@ var app = {
 
 		load_current_file();
 
+		function set_score(input_score) {
+			$(".rate_output").text(input_score);
+			$("input.rating").val(input_score);
+			current_data.score = input_score;
+		}
+
+		function set_happy_text(input_text) {
+			$(".happy_text").val(input_text);
+			current_data.text = input_text;
+		}
+
+		function set_section_data(input_data) {
+			var section_names = [];
+			$(".open_page").each(function(){
+				section_names.push(this.id);
+			});
+
+			$(section_names).each(function() {
+				if(input_data.hasOwnProperty(this)){
+					$("#"+this+" .info").text("");
+					$("#"+this+" .info").append(input_data[this].join(", "));
+					$("#"+this).data("selected",input_data[this]);
+					current_data[this] = input_data[this];
+				}
+			});
+		}
+
 		function process_data_array() {
 			var index = findWithAttr(data_array, "date", current_data.date);
 
 			if(index != undefined){
 				if(data_array[index].hasOwnProperty("score")){
-					$(".rate_output").text(data_array[index].score);
-					$("input.rating").val(data_array[index].score);
-					current_data.score = data_array[index].score;
+					set_score(data_array[index].score);
 				}
 				if(data_array[index].hasOwnProperty("text")){
-					$(".happy_text").val(data_array[index].text);
-					current_data.text = data_array[index].text;
+					set_happy_text(data_array[index].text);
 				}
-
-				var section_names = [];
-				$(".open_page").each(function(){
-					section_names.push(this.id);
-				});
-
-				// alert(section_names);
-
-				$(section_names).each(function() {
-					// alert(this);
-					if(data_array[index].hasOwnProperty(this)){
-
-
-						$("#"+this+" .info").text("");
-						$("#"+this+" .info").append(data_array[index][this].join(", "));
-						$("#"+this).data("selected",data_array[index][this]);
-						current_data[this] = data_array[index][this];
-					}
-				});
+				set_section_data(data_array[index]);
 			}
 
 			index = findWithAttr(data_array, "name", "config_object");
@@ -351,69 +341,34 @@ var app = {
 			}
 		}
 
-		$(".add_new_date").click(function() {
-			$(".date_picker").click();
-		});
-
-		$(".date_picker").change(function() {
-			load_date(format_date($(this).val()));
-		});
-
 		function load_date(input_date) {
 
-			selected_date = input_date;
-
-			$(".selected_date").text(selected_date);
-
-			var index = findWithAttr(data_array, "date", selected_date);
-
 			current_data = {};
-			current_data.date = selected_date;
+			current_data.date = input_date;
+
+			$(".selected_date").text(current_data.date);
+
+			var index = findWithAttr(data_array, "date", current_data.date);
+
+			set_score(50);
+			set_happy_text("");
+
+			$(".open_page").each(function() {
+				$(this).data("selected","");
+				$(this).find(".info").text("");
+			});
 
 			if(index != undefined){
 				if(data_array[index].hasOwnProperty("score")){
-					$(".rate_output").text(data_array[index].score);
-					$("input.rating").val(data_array[index].score);
-					current_data.score = data_array[index].score;
+					set_score(data_array[index].score);
 				}
 				if(data_array[index].hasOwnProperty("text")){
-					$(".happy_text").val(data_array[index].text);
-					current_data.text = data_array[index].text;
+					set_happy_text(data_array[index].text);
 				}
+				set_section_data(data_array[index]);
 
-				var section_names = [];
-				$(".open_page").each(function(){
-					section_names.push(this.id);
-				});
-
-				// alert(section_names);
-
-				$(section_names).each(function() {
-					// alert(this);
-					if(data_array[index].hasOwnProperty(this)){
-
-
-						$("#"+this+" .info").text("");
-						$("#"+this+" .info").append(data_array[index][this].join(", "));
-						$("#"+this).data("selected",data_array[index][this]);
-						current_data[this] = data_array[index][this];
-					}
-				});
 			}else{ // day not found
-
 				$(".day_list").append('<div class="day"><h1>'+current_data.date+'</h1><h2 class="day_score"></h2></div>');
-
-				$(".rate_output").text(50);
-				$("input.rating").val(50);
-				current_data.score = 50;
-
-				$(".happy_text").val("");
-				current_data.text = "";
-
-				$(".open_page").each(function() {
-					$(this).data("selected","");
-					$(this).find(".info").text("");
-				});
 			}
 			//
 			$(".page").addClass("hidden");
@@ -421,6 +376,49 @@ var app = {
 
 			// alert("home page should be showing");
 		};
+
+
+		function clear_and_fill_item_area(selector, data_name, data_area) {
+			$(selector).text("");
+
+			var items = data_area.data(data_name);
+
+			for (var i = 0; i < items.length; i++) {
+				$("<div class='item'><p class='name'>"+items[i]+"</p></div>").appendTo($(selector));
+			}
+		}
+
+
+
+		function get_item_list(item_selector) {
+			var item_list = $(item_selector);
+			var output = [];
+			for (var i = 0; i < item_list.length; i++) {
+				output.push($(item_list[i]).find(".name").text());
+			}
+			// alert("output "+JSON.stringify(output));
+			return output;
+		}
+
+		function go_back(){
+			$(".page").addClass("hidden");
+			$(".home_page").removeClass("hidden");
+			$("#"+current_page+" .info").text("");
+			$("#"+current_page+" .info").append(get_item_list(".selected_area .item").join(", "));
+			$("#"+current_page).data("selected",get_item_list(".selected_area .item"));
+			$("#"+current_page).data("options",get_item_list(".options_area .item"));
+			current_data[current_page] = get_item_list(".selected_area .item");
+			config_object[current_page] = get_item_list(".options_area .item");
+			update_file(current_data);
+		}
+
+		$(".add_new_date").click(function() {
+			$(".date_picker").click();
+		});
+
+		$(".date_picker").change(function() {
+			load_date(format_date($(this).val()));
+		});
 
 		$(".happy_text").on("change", function(){
 			current_data.text = $(this).val();
@@ -458,26 +456,9 @@ var app = {
 
 			$(".select_page_title").text($(this).find(".title").text());
 
-			$(".options_area").text("");
-
-			var options = $(this).data("options");
-
-			for (var i = 0; i < options.length; i++) {
-				$("<div class='item'><p class='name'>"+options[i]+"</p></div>").appendTo(".options_area");
-			}
-
-			$(".selected_area").text("");
-
-			var selected = $(this).data("selected");
-
-			for (var i = 0; i < selected.length; i++) {
-				$("<div class='item'><p class='name'>"+selected[i]+"</p></div>").appendTo(".selected_area");
-			}
-
+			clear_and_fill_item_area(".options_area", "options", $(this));
+			clear_and_fill_item_area(".selected_area", "selected", $(this));
 		});
-
-
-
 
 		$(".options_area").on("click", ".item", function () {
 			$(this).clone().appendTo(".selected_area");
@@ -488,27 +469,26 @@ var app = {
 			$(this).remove();
 		});
 
-		var pressTimer;
+		alert("down file 2");
 
-		var current_item;
+		var hold_down = {};
 
 		$(".options_area").on("mouseup", ".item", function(){
-			clearTimeout(pressTimer)
+			clearTimeout(hold_down.pressTimer)
 			// Clear timeout
 			return false;
 		}).on("mousedown", ".item", function(){
-			current_item = $(this);
+			hold_down.current_item = $(this);
 			// Set timeout
-			pressTimer = window.setTimeout(function() {
-				if (confirm('Would you like to remove '+$(current_item).find(".name").text())+"?") {
-					$(current_item).remove();
+			hold_down.pressTimer = window.setTimeout(function() {
+				if (confirm('Would you like to remove '+$(hold_down.current_item).find(".name").text())+"?") {
+					$(hold_down.current_item).remove();
 				} else {
 					//
 				}
 			},200)
 			return false;
 		});
-
 
 		$(".add_new_item").on("change", function () {
 			if($(this).val()!=""){
@@ -518,37 +498,9 @@ var app = {
 			}
 		});
 
-		$(".back_icon").on("click",go_back);
+		alert("down file");
 
-		function get_selected_list() {
-			var selected_items = $(".selected_area .item");
-			var output = [];
-			for (var i = 0; i < selected_items.length; i++) {
-				output.push($(selected_items[i]).find(".name").text());
-			}
-			return output;
-		}
-
-		function get_options_list() {
-			var option_items = $(".options_area .item");
-			var output = [];
-			for (var i = 0; i < option_items.length; i++) {
-				output.push($(option_items[i]).find(".name").text());
-			}
-			return output;
-		}
-
-		function go_back(){
-			$(".page").addClass("hidden");
-			$(".home_page").removeClass("hidden");
-			$("#"+current_page+" .info").text("");
-			$("#"+current_page+" .info").append(get_selected_list().join(", "));
-			$("#"+current_page).data("selected",get_selected_list());
-			$("#"+current_page).data("options",get_options_list());
-			current_data[current_page] = get_selected_list();
-			config_object[current_page] = get_options_list();
-			update_file(current_data);
-		}
+		$(".back_icon").on("click", go_back);
 
 	}
 };
