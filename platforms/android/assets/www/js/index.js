@@ -40,28 +40,6 @@ var app = {
 	// Update DOM on a Received Event
 	receivedEvent: function(id) {
 
-		function format_date(input_date){
-			var temp_date;
-			if(input_date == null){
-				temp_date = new Date();
-			}else{
-				temp_date = new Date(input_date);
-			}
-			var dd = temp_date.getDate();
-			var mm = temp_date.getMonth()+1; //January is 0!
-			var yyyy = temp_date.getFullYear();
-
-			if(dd<10) {
-			    dd='0'+dd
-			}
-
-			if(mm<10) {
-			    mm='0'+mm
-			}
-
-			return dd+'/'+mm+'/'+yyyy;
-		}
-
 		var new_data_to_be_written_to_file = false;
 
 		var current_data = {};
@@ -85,115 +63,65 @@ var app = {
 
 		var current_page = "home_page";
 
-		document.addEventListener("backbutton", function(e){
-			e.preventDefault();
-			if(current_page!="home_page"){
-				go_back();
-			}
-		}, false);
+		read_write_file( storage_path );
 
-		var ExternalStorageSdcardAccess = function ( fileHandler, errorHandler ) {
-			var root = "file:///";
+		function read_write_file( path ) {
+		    window.resolveLocalFileSystemURL(path, gotFiles, file_error_handling );
+		}
 
-			return {
-			    scanRoot:scanRoot,
-			    scanPath:scanPath
-			};
+		function gotFiles(entry) {
+	    if (entry.isDirectory){
+				var dirReader = entry.createReader();
+        dirReader.readEntries( function(entryList) {
 
-			function scanPath( path ) {
-			    window.resolveLocalFileSystemURL(path, gotFiles, errorHandler );
-			}
+					var file_exists = entryList.find(function(file) {
+						return file.name === 'behappy_log.txt';
+					})?true:false;
 
-			function scanRoot() {
-			    scanPath( root );
-			}
+					entry.getFile('behappy_log.txt', {create: !file_exists}, function(fileEntry) {
 
-			function gotFiles(entry) {
-		    if (entry.isDirectory){
-					alert("is dir");
-					var dirReader = entry.createReader();
-	        dirReader.readEntries( function(entryList) {
-						if(entryList.find(function(file) {
-							return file.name === 'behappy_log.txt';
-						})){
-							// alert("already exists");
-
-							if(new_data_to_be_written_to_file){
-
-								entry.getFile('behappy_log.txt', {create: false}, function(fileEntry) {
-
-							    // Create a FileWriter object for our FileEntry (log.txt).
-							    fileEntry.createWriter(function(fileWriter) {
-
-							      fileWriter.onwriteend = function(e) {
-							        console.log('Write completed.');
-							      };
-
-							      fileWriter.onerror = function(e) {
-							        console.log('Write failed: ' + e.toString());
-							      };
-
-							      // Create a new Blob and write it to log.txt.
-							      var blob = new Blob([JSON.stringify(data_array)], {type: 'text/plain'});
-
-							      fileWriter.write(blob);
-
-										new_data_to_be_written_to_file = false;
-
-							    }, errorHandler);
-
-							  }, errorHandler);
-
-							}else{
-								entry.getFile('behappy_log.txt', {}, function(fileEntry) {
-									fileEntry.file(function(file) {
-							       var reader = new FileReader();
-
-							       reader.onloadend = function(e) {
-							        //  alert(this.result);
-											 fileHandler(this.result);
-							       };
-
-							       reader.readAsText(file);
-							    }, errorHandler);
-						    }, errorHandler);
-							}
-						}else{
-							// alert("doesn't exist, create blank file");
-
-							entry.getFile("behappy_log.txt", {create: true, exclusive: true}, function(fileEntry) {
-
-								// alert("file entry: "+JSON.stringify(fileEntry));
-
-								fileEntry.createWriter(function(fileWriter) {
-
-									fileWriter.onwriteend = function(e) {
-										alert('Write completed.');
-									};
-
-									fileWriter.onerror = function(e) {
-										alert('Write failed: ' + e.toString());
-									};
-
-									// Create a new Blob and write it to log.txt.
-
-									var blob = new Blob([new_data_to_be_written_to_file?JSON.stringify(data_array):""], {type: 'text/plain'});
-
-									fileWriter.write(blob);
-
-									new_data_to_be_written_to_file = false;
-
-									fileHandler("empty");
-
-								}, errorHandler);
-							}, errorHandler);
+						if(new_data_to_be_written_to_file){
+							write_to_file(fileEntry);
+						}else{ // no new data to be written to file, therefore READ the data
+							read_from_file(fileEntry);
 						}
-	        }, errorHandler );
-		    }
-			}
-		};
 
-		function errorHandler(e) {
+						// end of file opperations
+					}, file_error_handling);
+        }, file_error_handling );
+	    }
+		}
+
+		function write_to_file(input_file) {
+			input_file.createWriter(function(fileWriter) {
+
+				fileWriter.onwriteend = function(e) {
+					console.log('Write completed.');
+				};
+
+				fileWriter.onerror = function(e) {
+					console.log('Write failed: ' + e.toString());
+				};
+
+				var blob = new Blob([JSON.stringify(data_array)], {type: 'text/plain'});
+				fileWriter.write(blob);
+
+				new_data_to_be_written_to_file = false;
+			}, file_error_handling);
+		}
+
+		function read_from_file(input_file) {
+			input_file.file(function(file) {
+				var reader = new FileReader();
+
+				reader.onloadend = function(e) {
+					process_data_array(JSON.parse(this.result));
+				};
+				reader.readAsText(file);
+			}, file_error_handling);
+		}
+
+		function file_error_handling(e) {
 		  var msg = '';
 
 		  switch (e.code) {
@@ -226,18 +154,27 @@ var app = {
 		  alert('Error: ' + msg);
 		}
 
-		function load_current_file(){
-			new ExternalStorageSdcardAccess( fileHandler, errorHandler ).scanPath( storage_path );
-			function fileHandler( fileEntry ) {
-				data_array = JSON.parse(fileEntry);
-
-				process_data_array();
-
-				alert("data loaded from file");
+		function format_date(input_date){
+			var temp_date;
+			if(input_date == null){
+				temp_date = new Date();
+			}else{
+				temp_date = new Date(input_date);
 			}
-		}
+			var dd = temp_date.getDate();
+			var mm = temp_date.getMonth()+1; //January is 0!
+			var yyyy = temp_date.getFullYear();
 
-		load_current_file();
+			if(dd<10) {
+			    dd='0'+dd
+			}
+
+			if(mm<10) {
+			    mm='0'+mm
+			}
+
+			return dd+'/'+mm+'/'+yyyy;
+		}
 
 		function set_score(input_score) {
 			$(".rate_output").text(input_score);
@@ -266,7 +203,9 @@ var app = {
 			});
 		}
 
-		function process_data_array() {
+		function process_data_array(input_data) {
+			data_array = input_data;
+
 			var index = findWithAttr(data_array, "date", current_data.date);
 
 			if(index != undefined){
@@ -335,11 +274,7 @@ var app = {
 				data_array.push(config_object);
 			}
 
-			new ExternalStorageSdcardAccess( fileHandler, errorHandler ).scanPath( storage_path );
-			function fileHandler( fileEntry ) {
-				data_array = JSON.parse(fileEntry);
-				alert("data loaded from file");
-			}
+			read_write_file( storage_path );
 		}
 
 		function load_date(input_date) {
@@ -369,7 +304,7 @@ var app = {
 				set_section_data(data_array[index]);
 
 			}else{ // day not found
-				$(".day_list").append('<div class="day"><h1>'+current_data.date+'</h1><h2 class="day_score"></h2></div>');
+				$(".day_list").append('<div class="day" data-date="'+current_data.date+'"><h2 class="day_score"></h2><h1>'+current_data.date+'</h1></div>');
 			}
 			//
 			$(".page").addClass("hidden");
@@ -378,18 +313,15 @@ var app = {
 			// alert("home page should be showing");
 		};
 
-
-		function clear_and_fill_item_area(selector, data_name) {
+		function clear_and_fill_item_area(selector, data_name, data_area) {
 			$(selector).text("");
 
-			var items = $(this).data(data_name);
+			var items = data_area.data(data_name);
 
 			for (var i = 0; i < items.length; i++) {
 				$("<div class='item'><p class='name'>"+items[i]+"</p></div>").appendTo($(selector));
 			}
 		}
-
-
 
 		function get_item_list(item_selector) {
 			var item_list = $(item_selector);
@@ -397,13 +329,12 @@ var app = {
 			for (var i = 0; i < item_list.length; i++) {
 				output.push($(item_list[i]).find(".name").text());
 			}
-			alert("output "+JSON.stringify(output));
+			// alert("output "+JSON.stringify(output));
 			return output;
 		}
 
-		function go_back(){
-			$(".page").addClass("hidden");
-			$(".home_page").removeClass("hidden");
+		function go_back_from_item_page(){
+			go_to_home_page();
 			$("#"+current_page+" .info").text("");
 			$("#"+current_page+" .info").append(get_item_list(".selected_area .item").join(", "));
 			$("#"+current_page).data("selected",get_item_list(".selected_area .item"));
@@ -412,6 +343,28 @@ var app = {
 			config_object[current_page] = get_item_list(".options_area .item");
 			update_file(current_data);
 		}
+
+		function go_to_history_page() {
+			$(".page").addClass("hidden");
+			$(".date_page").removeClass("hidden");
+			current_page="date_page";
+		}
+
+		function go_to_home_page() {
+			$(".page").addClass("hidden");
+			$(".home_page").removeClass("hidden");
+		}
+
+		document.addEventListener("backbutton", function(e){
+			e.preventDefault();
+			if(current_page!="home_page"&&current_page!="date_page"){
+				go_back_from_item_page();
+			}else if(current_page=="home_page"){
+				go_to_history_page();
+			}else if(current_page=="date_page"){
+				go_to_home_page();
+			}
+		}, false);
 
 		$(".add_new_date").click(function() {
 			$(".date_picker").click();
@@ -436,8 +389,7 @@ var app = {
 		});
 
 		$(".js_history").click(function() {
-			$(".page").addClass("hidden");
-			$(".date_page").removeClass("hidden");
+			go_to_history_page();
 		});
 
 		$(".date_page").on("click",".day",function() {
@@ -457,8 +409,8 @@ var app = {
 
 			$(".select_page_title").text($(this).find(".title").text());
 
-			clear_and_fill_item_area(".options_area", "options");
-			clear_and_fill_item_area(".selected_area", "selected");
+			clear_and_fill_item_area(".options_area", "options", $(this));
+			clear_and_fill_item_area(".selected_area", "selected", $(this));
 		});
 
 		$(".options_area").on("click", ".item", function () {
@@ -469,8 +421,6 @@ var app = {
 		$(".selected_area").on("click", ".item", function () {
 			$(this).remove();
 		});
-
-		alert("down file 2");
 
 		var hold_down = {};
 
@@ -499,9 +449,7 @@ var app = {
 			}
 		});
 
-		alert("down file");
-
-		$(".back_icon").on("click", go_back);
+		$(".back_icon").on("click", go_back_from_item_page);
 
 	}
 };

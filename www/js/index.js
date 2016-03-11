@@ -180,6 +180,7 @@ var app = {
 			$(".rate_output").text(input_score);
 			$("input.rating").val(input_score);
 			current_data.score = input_score;
+			$(".day_list .day[data-date='"+current_data.date+"']").find(".day_score").text(input_score);
 		}
 
 		function set_happy_text(input_text) {
@@ -239,7 +240,7 @@ var app = {
 
 			$(data_array).each(function() {
 				if (this.hasOwnProperty('date')) {
-				  $(".day_list").append('<div class="day"><h1>'+this.date+'</h1><h2>'+this.score+'</h2></div>');
+				  $(".day_list").append('<div class="day" data-date="'+this.date+'"><h2 class="day_score">'+this.score+'</h2><h1>'+this.date+'</h1></div>');
 				}
 			});
 		}
@@ -284,8 +285,6 @@ var app = {
 
 			$(".selected_date").text(current_data.date);
 
-			var index = findWithAttr(data_array, "date", current_data.date);
-
 			set_score(50);
 			set_happy_text("");
 
@@ -293,6 +292,8 @@ var app = {
 				$(this).data("selected","");
 				$(this).find(".info").text("");
 			});
+
+			var index = findWithAttr(data_array, "date", current_data.date);
 
 			if(index != undefined){
 				if(data_array[index].hasOwnProperty("score")){
@@ -304,7 +305,7 @@ var app = {
 				set_section_data(data_array[index]);
 
 			}else{ // day not found
-				$(".day_list").append('<div class="day"><h1>'+current_data.date+'</h1><h2 class="day_score"></h2></div>');
+				$(".day_list").append('<div class="day" data-date="'+current_data.date+'"><h2 class="day_score"></h2><h1>'+current_data.date+'</h1></div>');
 			}
 			//
 			$(".page").addClass("hidden");
@@ -333,9 +334,8 @@ var app = {
 			return output;
 		}
 
-		function go_back(){
-			$(".page").addClass("hidden");
-			$(".home_page").removeClass("hidden");
+		function go_back_from_item_page(){
+			go_to_home_page();
 			$("#"+current_page+" .info").text("");
 			$("#"+current_page+" .info").append(get_item_list(".selected_area .item").join(", "));
 			$("#"+current_page).data("selected",get_item_list(".selected_area .item"));
@@ -345,10 +345,25 @@ var app = {
 			update_file(current_data);
 		}
 
+		function go_to_history_page() {
+			$(".page").addClass("hidden");
+			$(".date_page").removeClass("hidden");
+			current_page="date_page";
+		}
+
+		function go_to_home_page() {
+			$(".page").addClass("hidden");
+			$(".home_page").removeClass("hidden");
+		}
+
 		document.addEventListener("backbutton", function(e){
 			e.preventDefault();
-			if(current_page!="home_page"){
-				go_back();
+			if(current_page!="home_page"&&current_page!="date_page"){
+				go_back_from_item_page();
+			}else if(current_page=="home_page"){
+				go_to_history_page();
+			}else if(current_page=="date_page"){
+				go_to_home_page();
 			}
 		}, false);
 
@@ -367,6 +382,7 @@ var app = {
 
 		$("input.rating").on( "touchmove mousemove change", function(){
 			$(".rate_output").text($("input.rating").val());
+			$(".day_list .day[data-date='"+current_data.date+"']").find(".day_score").text($("input.rating").val());
 			current_data.score = $("input.rating").val();
 		});
 
@@ -375,8 +391,7 @@ var app = {
 		});
 
 		$(".js_history").click(function() {
-			$(".page").addClass("hidden");
-			$(".date_page").removeClass("hidden");
+			go_to_history_page();
 		});
 
 		$(".date_page").on("click",".day",function() {
@@ -436,7 +451,7 @@ var app = {
 			}
 		});
 
-		$(".back_icon").on("click", go_back);
+		$(".back_icon").on("click", go_back_from_item_page);
 
 	}
 };

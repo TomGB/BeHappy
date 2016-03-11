@@ -178,3 +178,12 @@ p, h1, h2, h3, h4{
     text-align: center;
     padding: 10px;
 }
+
+.date_page .day{
+  width: 100%;
+}
+
+.date_page .day .day_score{
+  padding-top: 3px;
+  width: 40px;
+}
