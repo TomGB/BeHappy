@@ -2,6 +2,9 @@ BeHappy is a Happy Me clone with added functionality
 
 The app has been created using Phonegap and Cordova.
 
+To create an APK use "phonegap build" command.
+The APK can be found in /platforms/android/output
+
 ------ Functions ------
 
 update_file(current_data)
