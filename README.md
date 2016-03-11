@@ -11,10 +11,9 @@ update_file(current_data)
 format_date(date)
   good short simple function formats data like: 21/03/2016
 
-ExternalStorageSdcardAccess and gotFiles()
-  Bloated methods as too much goes on in gotFiles,
-  reading and writing to the external file, used on app load and on data update
-  * currently difficult to understand
+read_write_file()
+  uses global flag: new_data_to_be_written_to_file
+  either reads the data from the file on app launch or writes data to the file on save.
 
 process_data_array()
   extracts any data on the currently selected date
