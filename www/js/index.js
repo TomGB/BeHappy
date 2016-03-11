@@ -237,12 +237,6 @@ var app = {
 					}
 				});
 			}
-
-			$(data_array).each(function() {
-				if (this.hasOwnProperty('date')) {
-				  $(".day_list").append('<div class="day" data-date="'+this.date+'"><h2 class="day_score">'+this.score+'</h2><h1>'+this.date+'</h1></div>');
-				}
-			});
 		}
 
 		function findWithAttr(array, attr, value) {
@@ -304,8 +298,6 @@ var app = {
 				}
 				set_section_data(data_array[index]);
 
-			}else{ // day not found
-				$(".day_list").append('<div class="day" data-date="'+current_data.date+'"><h2 class="day_score"></h2><h1>'+current_data.date+'</h1></div>');
 			}
 			//
 			$(".page").addClass("hidden");
@@ -346,6 +338,13 @@ var app = {
 		}
 
 		function go_to_history_page() {
+
+			$(data_array).each(function() {
+				if (this.hasOwnProperty('date')) {
+				  $(".day_list").append('<div class="day" data-date="'+this.date+'"><h2 class="day_score">'+this.score+'</h2><h1>'+this.date+'</h1></div>');
+				}
+			});
+
 			$(".page").addClass("hidden");
 			$(".date_page").removeClass("hidden");
 			current_page="date_page";

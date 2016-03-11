@@ -180,6 +180,7 @@ var app = {
 			$(".rate_output").text(input_score);
 			$("input.rating").val(input_score);
 			current_data.score = input_score;
+			$(".day_list .day[data-date='"+current_data.date+"']").find(".day_score").text(input_score);
 		}
 
 		function set_happy_text(input_text) {
@@ -236,12 +237,6 @@ var app = {
 					}
 				});
 			}
-
-			$(data_array).each(function() {
-				if (this.hasOwnProperty('date')) {
-				  $(".day_list").append('<div class="day"><h1>'+this.date+'</h1><h2>'+this.score+'</h2></div>');
-				}
-			});
 		}
 
 		function findWithAttr(array, attr, value) {
@@ -284,8 +279,6 @@ var app = {
 
 			$(".selected_date").text(current_data.date);
 
-			var index = findWithAttr(data_array, "date", current_data.date);
-
 			set_score(50);
 			set_happy_text("");
 
@@ -293,6 +286,8 @@ var app = {
 				$(this).data("selected","");
 				$(this).find(".info").text("");
 			});
+
+			var index = findWithAttr(data_array, "date", current_data.date);
 
 			if(index != undefined){
 				if(data_array[index].hasOwnProperty("score")){
@@ -303,8 +298,6 @@ var app = {
 				}
 				set_section_data(data_array[index]);
 
-			}else{ // day not found
-				$(".day_list").append('<div class="day" data-date="'+current_data.date+'"><h2 class="day_score"></h2><h1>'+current_data.date+'</h1></div>');
 			}
 			//
 			$(".page").addClass("hidden");
@@ -345,6 +338,13 @@ var app = {
 		}
 
 		function go_to_history_page() {
+
+			$(data_array).each(function() {
+				if (this.hasOwnProperty('date')) {
+				  $(".day_list").append('<div class="day" data-date="'+this.date+'"><h2 class="day_score">'+this.score+'</h2><h1>'+this.date+'</h1></div>');
+				}
+			});
+
 			$(".page").addClass("hidden");
 			$(".date_page").removeClass("hidden");
 			current_page="date_page";
@@ -381,6 +381,7 @@ var app = {
 
 		$("input.rating").on( "touchmove mousemove change", function(){
 			$(".rate_output").text($("input.rating").val());
+			$(".day_list .day[data-date='"+current_data.date+"']").find(".day_score").text($("input.rating").val());
 			current_data.score = $("input.rating").val();
 		});
 
