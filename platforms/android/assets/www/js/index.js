@@ -339,6 +339,8 @@ var app = {
 
 		function go_to_history_page() {
 
+			$(".day_list").text("");
+
 			$(data_array).each(function() {
 				if (this.hasOwnProperty('date')) {
 				  $(".day_list").append('<div class="day" data-date="'+this.date+'"><h2 class="day_score">'+this.score+'</h2><h1>'+this.date+'</h1></div>');

@@ -51,16 +51,17 @@ p, h1, h2, h3, h4{
 }
 
 .logo{
+    display: inline-block;
     width: 50px;
     height: 50px;
     background-image: url("../img/behappylogo.jpg");
     background-size: contain;
     background-position: 50%;
     background-repeat: no-repeat;
-
 }
 
 .titlebar h1{
+  display: inline-block;
     color: red;
     font-weight: normal;
     width: calc(100% - 60px);
@@ -75,7 +76,8 @@ p, h1, h2, h3, h4{
     width: 100%;
 }
 
-.js_today, .js_history{
+.selected_date, .js_history{
+  display: inline-block;
     width: 47%;
     text-align: center;
     padding: 30px;
@@ -191,10 +193,12 @@ p, h1, h2, h3, h4{
 .date_page .day .day_score{
   display: inline-block;
   padding-top: 3px;
-  width: 40px;
+  width: 80px;
+  text-align: center;
 }
 
 .date_picker{
   width: 0px;
-  height: 0px
+  height: 0px;
+  background-color: white
 }
