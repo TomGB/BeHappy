@@ -298,6 +298,8 @@ var app = {
 				}
 				set_section_data(data_array[index]);
 
+			}else{
+				data_array.push(current_data);
 			}
 			//
 			$(".page").addClass("hidden");
@@ -327,7 +329,6 @@ var app = {
 		}
 
 		function go_back_from_item_page(){
-			go_to_home_page();
 			$("#"+current_page+" .info").text("");
 			$("#"+current_page+" .info").append(get_item_list(".selected_area .item").join(", "));
 			$("#"+current_page).data("selected",get_item_list(".selected_area .item"));
@@ -335,24 +336,38 @@ var app = {
 			current_data[current_page] = get_item_list(".selected_area .item");
 			config_object[current_page] = get_item_list(".options_area .item");
 			update_file(current_data);
+			go_to_home_page();
 		}
 
 		function go_to_history_page() {
 
 			$(".day_list").text("");
 
+			var index = findWithAttr(data_array,"date",current_data.date);
+
+			if(index != undefined){
+				data_array[index] = current_data;
+			}else{
+				data_array.push(current_data);
+			}
+
 			$(data_array).each(function() {
 				if (this.hasOwnProperty('date')) {
-				  $(".day_list").append('<div class="day" data-date="'+this.date+'"><h2 class="day_score">'+this.score+'</h2><h1>'+this.date+'</h1></div>');
+					var score = "50";
+					if (this.hasOwnProperty('score')) {
+						score = this.score;
+					}
+				  $(".day_list").append('<div class="day" data-date="'+this.date+'"><h2 class="day_score">'+score+'</h2><h1>'+this.date+'</h1></div>');
 				}
 			});
 
 			$(".page").addClass("hidden");
 			$(".date_page").removeClass("hidden");
-			current_page="date_page";
+			current_page = "date_page";
 		}
 
 		function go_to_home_page() {
+			current_page = "home_page";
 			$(".page").addClass("hidden");
 			$(".home_page").removeClass("hidden");
 		}
@@ -369,6 +384,7 @@ var app = {
 		}, false);
 
 		$(".add_new_date").click(function() {
+			$(".date_picker").val("");
 			$(".date_picker").click();
 		});
 
