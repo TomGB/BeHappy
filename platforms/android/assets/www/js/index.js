@@ -57,50 +57,58 @@ var app = {
 			work: ["Made progress","Impressed Boss","Helped College","Finished Project"]
 		};
 
-		var storage_path = cordova.file.externalRootDirectory;
+		var storage_path = cordova.file.dataDirectory;
 
 		$(".save_location").text(storage_path);
 
 		var current_page = "home_page";
 
-		read_write_file( storage_path );
+		read_write_file();
 
-		function read_write_file( path ) {
-		    window.resolveLocalFileSystemURL(path, gotFiles, file_error_handling );
+		function read_write_file() {
+			window.webkitStorageInfo.requestQuota(PERSISTENT, 1024*1024, function(grantedBytes) {
+				// alert("after request quota");
+				window.requestFileSystem(PERSISTENT, grantedBytes, got_file_system, file_error_handling);
+			}, file_error_handling);
 		}
 
-		function gotFiles(entry) {
-	    if (entry.isDirectory){
-				var dirReader = entry.createReader();
-        dirReader.readEntries( function(entryList) {
+		function got_file_system(fs) {
+			var dirReader = fs.root.createReader();
 
-					var file_exists = entryList.find(function(file) {
-						return file.name === 'behappy_log.txt';
-					})?true:false;
+			dirReader.readEntries( function(entryList) {
 
-					entry.getFile('behappy_log.txt', {create: !file_exists}, function(fileEntry) {
+				// alert("files read");
 
-						if(new_data_to_be_written_to_file){
-							write_to_file(fileEntry);
-						}else{ // no new data to be written to file, therefore READ the data
-							read_from_file(fileEntry);
-						}
+				var file_exists = entryList.find(function(file) {
+					return file.name === 'behappy_log.txt';
+				})?true:false;
 
-						// end of file opperations
-					}, file_error_handling);
-        }, file_error_handling );
-	    }
+				fs.root.getFile('behappy_log.txt', {create: !file_exists}, function(fileEntry) {
+
+					if(new_data_to_be_written_to_file){
+						write_to_file(fileEntry);
+					}else{ // no new data to be written to file, therefore READ the data
+						read_from_file(fileEntry);
+					}
+
+					// end of file opperations
+				}, file_error_handling);
+			}, file_error_handling );
 		}
 
 		function write_to_file(input_file) {
+			// alert("write to file called");
+
 			input_file.createWriter(function(fileWriter) {
 
+				// alert("inside filewriter");
+
 				fileWriter.onwriteend = function(e) {
-					console.log('Write completed.');
+				// alert('Write completed.');
 				};
 
 				fileWriter.onerror = function(e) {
-					console.log('Write failed: ' + e.toString());
+				// alert('Write failed: ' + e.toString());
 				};
 
 				var blob = new Blob([JSON.stringify(data_array)], {type: 'text/plain'});
@@ -111,10 +119,14 @@ var app = {
 		}
 
 		function read_from_file(input_file) {
+			// alert("read file called");
+
 			input_file.file(function(file) {
 				var reader = new FileReader();
 
 				reader.onloadend = function(e) {
+					// alert("on load end");
+					// alert("content:"+this.result);
 					process_data_array(JSON.parse(this.result));
 				};
 				reader.readAsText(file);
@@ -205,6 +217,8 @@ var app = {
 		}
 
 		function process_data_array(input_data) {
+			// alert("processing file");
+
 			data_array = input_data;
 
 			var index = findWithAttr(data_array, "date", current_data.date);
@@ -269,7 +283,7 @@ var app = {
 				data_array.push(config_object);
 			}
 
-			read_write_file( storage_path );
+			read_write_file();
 		}
 
 		function load_date(input_date) {
